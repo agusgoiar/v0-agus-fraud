@@ -73,7 +73,7 @@ const menuSections: MenuSection[] = [
     title: "MOTOR ANTIFRAUDE",
     items: [
       {
-        label: "Gestión",
+        label: "Administración",
         icon: <Building2 className="size-4" />,
         children: [
           { label: "Operaciones", href: "/antifraude/operaciones" },
