@@ -112,7 +112,7 @@ export function RulesList({
               <TableHead>Criticidad</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead>Última actualización</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead className="text-right">Opciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

@@ -16,7 +16,7 @@ export interface RuleCondition {
   field: string
   operator: ComparisonOperator
   value: string
-  scope: ConditionScope
+  scope?: ConditionScope
 }
 
 export interface ConditionGroup {
@@ -38,16 +38,19 @@ export interface FraudRule {
 }
 
 export const FIELD_OPTIONS = [
-  { value: "idCanal", label: "ID Canal" },
-  { value: "idTipoOperacion", label: "ID Tipo Operación" },
-  { value: "monto", label: "Monto" },
-  { value: "moneda", label: "Moneda" },
-  { value: "pais", label: "País" },
-  { value: "ip", label: "Dirección IP" },
-  { value: "dispositivo", label: "Dispositivo" },
-  { value: "horario", label: "Horario" },
-  { value: "cantidadTransacciones", label: "Cantidad de Transacciones" },
-  { value: "montoAcumulado", label: "Monto Acumulado" },
+  { value: "userId", label: "userId" },
+  { value: "cuit", label: "cuit" },
+  { value: "eventId", label: "eventId" },
+  { value: "operationId", label: "operationId" },
+  { value: "eventDate", label: "eventDate" },
+  { value: "amount", label: "amount" },
+  { value: "currency", label: "currency" },
+  { value: "originAccount", label: "originAccount" },
+  { value: "destinationAccount", label: "destinationAccount" },
+  { value: "channel", label: "channel" },
+  { value: "ip", label: "ip" },
+  { value: "deviceId", label: "deviceId" },
+  { value: "isTrustedDevice", label: "isTrustedDevice" },
 ]
 
 export const OPERATOR_OPTIONS: { value: ComparisonOperator; label: string }[] = [
@@ -61,12 +64,7 @@ export const OPERATOR_OPTIONS: { value: ComparisonOperator; label: string }[] = 
   { value: "IN", label: "IN" },
 ]
 
-export const SCOPE_OPTIONS: { value: ConditionScope; label: string }[] = [
-  { value: "misma_transaccion", label: "Misma transacción" },
-  { value: "misma_sesion", label: "Misma sesión" },
-  { value: "mismo_usuario", label: "Mismo usuario" },
-  { value: "historico", label: "Histórico" },
-]
+
 
 export const ACTION_OPTIONS: { value: ActionType; label: string }[] = [
   { value: "AUTENTICAR", label: "Autenticar" },

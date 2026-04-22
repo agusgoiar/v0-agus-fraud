@@ -6,7 +6,38 @@ import { Button } from "@/components/ui/button"
 import { RulesList } from "@/components/rules-list"
 import { RuleForm } from "@/components/rule-form"
 import { PlatformSidebar } from "@/components/platform-sidebar"
-import { FraudRule } from "@/lib/types"
+import { FraudRule, RiskList } from "@/lib/types"
+
+// Sample risk lists for the rule builder
+const sampleRiskLists: RiskList[] = [
+  {
+    id: "list1",
+    name: "Bancos riesgo alto",
+    description: "Bancos con riesgo operativo alto",
+    values: [{ id: "v1", value: "Banco A" }, { id: "v2", value: "Banco B" }],
+    isActive: true,
+    createdAt: new Date("2026-01-15"),
+    updatedAt: new Date("2026-04-01"),
+  },
+  {
+    id: "list2",
+    name: "IPs bloqueadas",
+    description: "Direcciones IP identificadas como fraudulentas",
+    values: [{ id: "v3", value: "192.168.1.1" }],
+    isActive: true,
+    createdAt: new Date("2026-02-10"),
+    updatedAt: new Date("2026-03-20"),
+  },
+  {
+    id: "list3",
+    name: "Dispositivos sospechosos",
+    description: "IDs de dispositivos marcados como sospechosos",
+    values: [],
+    isActive: true,
+    createdAt: new Date("2026-03-01"),
+    updatedAt: new Date("2026-04-10"),
+  },
+]
 
 // Sample data for demonstration
 const sampleRules: FraudRule[] = [
@@ -19,7 +50,7 @@ const sampleRules: FraudRule[] = [
         id: "g1",
         type: "standard",
         conditions: [
-          { id: "c1", field: "monto", operator: ">", value: "500000", scope: "misma_transaccion" },
+          { id: "c1", field: "amount", operator: ">", value: "500000" },
         ],
       },
     ],
@@ -38,8 +69,8 @@ const sampleRules: FraudRule[] = [
         id: "g2",
         type: "standard",
         conditions: [
-          { id: "c2", field: "cantidadTransacciones", operator: ">", value: "10", scope: "mismo_usuario" },
-          { id: "c3", logicalOperator: "AND", field: "horario", operator: "IN", value: "00:00-06:00", scope: "misma_transaccion" },
+          { id: "c2", field: "userId", operator: "=", value: "12345" },
+          { id: "c3", logicalOperator: "AND", field: "channel", operator: "=", value: "web" },
         ],
       },
     ],
@@ -51,14 +82,14 @@ const sampleRules: FraudRule[] = [
   },
   {
     id: "3",
-    name: "Cambio de dispositivo frecuente",
+    name: "Dispositivo no confiable",
     type: "evento",
     groups: [
       {
         id: "g3",
         type: "standard",
         conditions: [
-          { id: "c4", field: "dispositivo", operator: "!=", value: "habitual", scope: "mismo_usuario" },
+          { id: "c4", field: "isTrustedDevice", operator: "=", value: "false" },
         ],
       },
     ],
@@ -70,14 +101,14 @@ const sampleRules: FraudRule[] = [
   },
   {
     id: "4",
-    name: "Transacciones desde país no autorizado",
+    name: "IP en lista de riesgo",
     type: "operacion",
     groups: [
       {
         id: "g4",
-        type: "geoip",
+        type: "standard",
         conditions: [
-          { id: "c5", field: "pais", operator: "IN", value: "XX,YY,ZZ", scope: "misma_transaccion" },
+          { id: "c5", field: "ip", operator: "IN", value: "list2" },
         ],
       },
     ],
@@ -192,6 +223,7 @@ export default function ReglasPage() {
             <div className="max-w-4xl">
               <RuleForm
                 rule={editingRule || undefined}
+                riskLists={sampleRiskLists}
                 onSave={handleSave}
                 onCancel={handleCancel}
               />

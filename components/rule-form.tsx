@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import {
   Select,
   SelectContent,
@@ -20,10 +21,12 @@ import {
   CriticalityLevel,
   ACTION_OPTIONS,
   CRITICALITY_OPTIONS,
+  RiskList,
 } from "@/lib/types"
 
 interface RuleFormProps {
   rule?: FraudRule
+  riskLists: RiskList[]
   onSave: (rule: Omit<FraudRule, "id" | "createdAt" | "updatedAt">) => void
   onCancel: () => void
 }
@@ -32,9 +35,10 @@ function generateId() {
   return Math.random().toString(36).substring(2, 9)
 }
 
-export function RuleForm({ rule, onSave, onCancel }: RuleFormProps) {
+export function RuleForm({ rule, riskLists, onSave, onCancel }: RuleFormProps) {
   const [name, setName] = useState(rule?.name || "")
   const [type, setType] = useState<RuleType>(rule?.type || "operacion")
+  const [isEnabled, setIsEnabled] = useState(rule?.isActive ?? true)
   const [groups, setGroups] = useState<ConditionGroup[]>(
     rule?.groups || [
       {
@@ -43,10 +47,9 @@ export function RuleForm({ rule, onSave, onCancel }: RuleFormProps) {
         conditions: [
           {
             id: generateId(),
-            field: "idCanal",
+            field: "userId",
             operator: "=",
             value: "",
-            scope: "misma_transaccion",
           },
         ],
       },
@@ -65,42 +68,38 @@ export function RuleForm({ rule, onSave, onCancel }: RuleFormProps) {
       groups,
       action,
       criticalityLevel,
-      isActive: rule?.isActive ?? true,
+      isActive: isEnabled,
     })
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Basic Info */}
-      <div className="space-y-2">
-        <Label htmlFor="name">Nombre de la regla</Label>
-        <Input
-          id="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Ingrese el nombre de la regla"
-          required
-          className="max-w-md"
-        />
+      <div className="flex items-end gap-6">
+        <div className="flex-1 max-w-md space-y-2">
+          <Label htmlFor="name">Nombre de la regla</Label>
+          <Input
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Ingrese el nombre de la regla"
+            required
+          />
+        </div>
+        <div className="flex items-center gap-2 pb-2">
+          <Label htmlFor="enabled" className="text-sm">Habilitada</Label>
+          <Switch
+            id="enabled"
+            checked={isEnabled}
+            onCheckedChange={setIsEnabled}
+            className="data-[state=checked]:bg-primary"
+          />
+        </div>
       </div>
 
       {/* Rule Builder */}
       <div className="rounded-lg border border-border bg-muted/20 p-4">
-        <RuleBuilder groups={groups} onChange={setGroups} />
-
-        {/* Form Actions inside builder */}
-        <div className="mt-4 flex gap-2">
-          <Button type="submit" className="bg-accent text-accent-foreground hover:bg-accent/90">
-            Guardar
-          </Button>
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={onCancel}
-          >
-            Cancelar
-          </Button>
-        </div>
+        <RuleBuilder groups={groups} onChange={setGroups} riskLists={riskLists} />
       </div>
 
       {/* Action & Criticality */}
@@ -141,6 +140,20 @@ export function RuleForm({ rule, onSave, onCancel }: RuleFormProps) {
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      {/* Form Actions */}
+      <div className="flex gap-3">
+        <Button type="submit" className="bg-accent text-accent-foreground hover:bg-accent/90">
+          Guardar
+        </Button>
+        <Button
+          type="button"
+          variant="destructive"
+          onClick={onCancel}
+        >
+          Cancelar
+        </Button>
       </div>
     </form>
   )

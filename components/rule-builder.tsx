@@ -14,34 +14,31 @@ import {
 import {
   ConditionGroup,
   RuleCondition,
-  LogicalOperator,
-  ComparisonOperator,
-  ConditionScope,
   FIELD_OPTIONS,
   OPERATOR_OPTIONS,
-  SCOPE_OPTIONS,
+  RiskList,
 } from "@/lib/types"
 
 interface RuleBuilderProps {
   groups: ConditionGroup[]
   onChange: (groups: ConditionGroup[]) => void
+  riskLists: RiskList[]
 }
 
 function generateId() {
   return Math.random().toString(36).substring(2, 9)
 }
 
-export function RuleBuilder({ groups, onChange }: RuleBuilderProps) {
+export function RuleBuilder({ groups, onChange, riskLists }: RuleBuilderProps) {
   const addCondition = (groupId: string) => {
     const updatedGroups = groups.map((group) => {
       if (group.id === groupId) {
         const newCondition: RuleCondition = {
           id: generateId(),
           logicalOperator: group.conditions.length > 0 ? "AND" : undefined,
-          field: "idCanal",
+          field: "userId",
           operator: "=",
           value: "",
-          scope: "misma_transaccion",
         }
         return { ...group, conditions: [...group.conditions, newCondition] }
       }
@@ -93,10 +90,9 @@ export function RuleBuilder({ groups, onChange }: RuleBuilderProps) {
       conditions: [
         {
           id: generateId(),
-          field: type === "geoip" ? "pais" : "idCanal",
+          field: "userId",
           operator: "=",
           value: "",
-          scope: "misma_transaccion",
         },
       ],
     }
@@ -189,9 +185,13 @@ export function RuleBuilder({ groups, onChange }: RuleBuilderProps) {
                 {/* Operator */}
                 <Select
                   value={condition.operator}
-                  onValueChange={(value) =>
+                  onValueChange={(value) => {
                     updateCondition(group.id, condition.id, "operator", value)
-                  }
+                    // Clear value when switching to/from IN
+                    if (value === "IN" || condition.operator === "IN") {
+                      updateCondition(group.id, condition.id, "value", "")
+                    }
+                  }}
                 >
                   <SelectTrigger className="w-20 bg-background">
                     <SelectValue />
@@ -205,35 +205,42 @@ export function RuleBuilder({ groups, onChange }: RuleBuilderProps) {
                   </SelectContent>
                 </Select>
 
-                {/* Value */}
-                <Input
-                  type="text"
-                  value={condition.value}
-                  onChange={(e) =>
-                    updateCondition(group.id, condition.id, "value", e.target.value)
-                  }
-                  placeholder="Valor"
-                  className="w-32 bg-background"
-                />
-
-                {/* Scope */}
-                <Select
-                  value={condition.scope}
-                  onValueChange={(value) =>
-                    updateCondition(group.id, condition.id, "scope", value)
-                  }
-                >
-                  <SelectTrigger className="w-44 bg-background">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SCOPE_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {/* Value or Risk List */}
+                {condition.operator === "IN" ? (
+                  <Select
+                    value={condition.value}
+                    onValueChange={(value) =>
+                      updateCondition(group.id, condition.id, "value", value)
+                    }
+                  >
+                    <SelectTrigger className="w-44 bg-background">
+                      <SelectValue placeholder="Seleccionar lista" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {riskLists.length === 0 ? (
+                        <SelectItem value="" disabled>
+                          No hay listas creadas
+                        </SelectItem>
+                      ) : (
+                        riskLists.map((list) => (
+                          <SelectItem key={list.id} value={list.id}>
+                            {list.name}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    type="text"
+                    value={condition.value}
+                    onChange={(e) =>
+                      updateCondition(group.id, condition.id, "value", e.target.value)
+                    }
+                    placeholder="Valor"
+                    className="w-32 bg-background"
+                  />
+                )}
 
                 {/* Remove Condition */}
                 {group.conditions.length > 1 && (
